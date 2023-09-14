@@ -1,5 +1,6 @@
 FROM python:3
-ADD requirements.txt /
+WORKDIR /app
+COPY . /app
+COPY ./images /app/images
 RUN pip install -r requirements.txt
-ADD main.py /
 CMD [ "python", "./main.py" ]
