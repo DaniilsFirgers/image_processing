@@ -1,4 +1,7 @@
 def image_to_array(image):
+    """
+    Converts a PIL image to a 2D array
+    """
     width, height = image.size
     pixel_values = []
 
