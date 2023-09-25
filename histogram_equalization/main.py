@@ -19,4 +19,4 @@ equalized_image_array = [[mapped_intensity_levels[pixel]
 
 equalized_image_array = np.array(equalized_image_array, dtype=np.uint8)
 eq_img = Image.fromarray(equalized_image_array, mode='L')
-eq_img.save("/app/images/Equalized_Hawkes_Bay_NZ.jpg")
+eq_img.save("/app/images/equalized.jpg")
