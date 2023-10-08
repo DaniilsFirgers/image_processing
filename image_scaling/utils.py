@@ -2,40 +2,46 @@ from PIL import Image
 import numpy as np
 
 
-def image_to_array(file_path):
+def image_to_array(file_path: str):
+    """Converts a PIL image to a 2D array"""
     image = Image.open(file_path).convert('L')  # Convert to grayscale
     return np.array(image)
 
 
-def bilinear_scaling(image, new_height, new_width):
+def bilinear_scaling(image, new_height: int, new_width: int):
+    """Scales an image using bilinear interpolation"""
     height, width = image.shape
     x_ratio = new_width / width
     y_ratio = new_height / height
 
-    new_image = np.zeros((new_height, new_width))
+    scaled_image = np.zeros((new_height, new_width))
 
     for i in range(new_height):
         for j in range(new_width):
-            x = int(j / x_ratio)
-            y = int(i / y_ratio)
+            w = int(j / x_ratio)
+            h = int(i / y_ratio)
 
-            x_diff = (j / x_ratio) - x
-            y_diff = (i / y_ratio) - y
+            w_diff = (j / x_ratio) - w
+            h_diff = (i / y_ratio) - h
 
-            A = image[y, x]
-            B = image[y, x + 1] if x + 1 < width else 0
-            C = image[y + 1, x] if y + 1 < height else 0
-            D = image[y + 1, x + 1] if x + 1 < width and y + 1 < height else 0
+            A = image[h, w]
+            # checks if pixel to the right exists
+            B = image[h, w + 1] if w + 1 < width else 0
+            # checks if pixel below exists
+            C = image[h + 1, w] if h + 1 < height else 0
+            # checks if pixel to the right and below exists
+            D = image[h + 1, w + 1] if w + 1 < width and h + 1 < height else 0
 
-            new_image[i, j] = A * (1 - x_diff) * (1 - y_diff) + B * x_diff * (
-                1 - y_diff) + C * (1 - x_diff) * y_diff + D * x_diff * y_diff
+            # linear interpolation equation Y = A(1-w)(1-h) + B(w)(1-h) + C(h)(1-w) + Dwh
+            scaled_image[i, j] = A * (1 - w_diff) * (1 - h_diff) + B * w_diff * (
+                1 - h_diff) + C * (1 - w_diff) * h_diff + D * w_diff * h_diff
 
-    return new_image
+    return scaled_image
 
 
 def save_image(array, file_path):
     # Convert the NumPy array to an image
     image = Image.fromarray(array.astype('uint8'))
 
-    # Save the image
+    # Save the image to disk
     image.save(file_path)
