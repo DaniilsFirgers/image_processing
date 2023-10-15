@@ -18,7 +18,9 @@ def bilinear_scaling(image, new_height: int, new_width: int):
 
     for i in range(new_height):
         for j in range(new_width):
+            # width
             w = int(j / x_ratio)
+            # height
             h = int(i / y_ratio)
 
             w_diff = (j / x_ratio) - w
