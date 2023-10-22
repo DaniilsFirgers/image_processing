@@ -11,18 +11,21 @@ def image_to_array(file_path: str):
 def bilinear_scaling(image, new_height: int, new_width: int):
     """Scales an image using bilinear interpolation"""
     height, width = image.shape
+    # Calculate the ratio between the new and old image width and height
     x_ratio = new_width / width
     y_ratio = new_height / height
 
+    # Create an empty array for the scaled image
     scaled_image = np.zeros((new_height, new_width))
 
+    # Iterate over the new image pixels
     for i in range(new_height):
         for j in range(new_width):
             # width
             w = int(j / x_ratio)
             # height
             h = int(i / y_ratio)
-
+            # difference between the new and old pixel coordinates
             w_diff = (j / x_ratio) - w
             h_diff = (i / y_ratio) - h
 

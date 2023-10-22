@@ -1,6 +1,9 @@
-def haar(signal, level):
+# Hāra vilkņu pārveidošana ir grūti īstenojama uz reāla attēla, tāpēc es izmantosiu vienkāršu signālu.
 
-    s = .5
+def haar_wavelet_transform(signal, level):
+
+    # The scale factor is used to adjust the amplitude of the signal
+    scale_factor = .5**(1/2)
 
     # Both low and high filters help to separate different frequency components of the signal
     # We will aplly filter to all adjacent values in the signal
@@ -52,12 +55,13 @@ def haar(signal, level):
                 # 2*j is used to ensure we're working with adjacent pairs of values in the original signal
                 # k is used to access the appropriate filter coefficient.
                 # low_pass_f[k] represents the k-th coefficient of the low-pass filter
-                output[j] += signal_copy[2*j + k] * low_pass_f[k] * s
+                output[j] += signal_copy[2*j + k] * \
+                    low_pass_f[k] * scale_factor
 
                 # Updates the j + split_len-th element of the output array
                 # high_pass_f[k] represents the k-th coefficient of the high-pass filter.
                 output[j+split_len] += signal_copy[2*j + k] * \
-                    high_pass_f[k] * s
+                    high_pass_f[k] * scale_factor
 
         # updates the length of the signal (signal_len) to be equal to split_len
         signal_len = split_len
@@ -71,19 +75,23 @@ def haar(signal, level):
 
 
 def main():
-    s0 = [56, 40, 8, 24, 48, 48, 40, 16]
+    signal = [56, 40, 8, 24, 48, 48, 40, 16]
 
-    print("level 0")
-    print(s0)
+    # Base level
+    print("Level 0")
+    print(signal)
 
-    print("level 1")
-    print(haar(s0, 1))
+    # Level 1 where we apply the filter once
+    print("Level 1")
+    print(haar_wavelet_transform(signal, 1))
 
-    print("level 2")
-    print(haar(s0, 2))
+    # Level 2 where we apply the filter twice
+    print("Level 2")
+    print(haar_wavelet_transform(signal, 2))
 
-    print("level 3")
-    print(haar(s0, 3))
+    # Level 3 where we apply the filter three times
+    print("Level 3")
+    print(haar_wavelet_transform(signal, 3))
 
 
 if __name__ == "__main__":
