@@ -8,7 +8,7 @@ HUE_VALUES = {
     "blue": 240,
 }
 
-INPUT_IMAGE_PATH = "images/cat.jpg"
+INPUT_IMAGE_PATH = "/app/images/cat.jpg"
 
 
 class CustomHueImage:
@@ -131,5 +131,5 @@ for hue_name, hue_value in HUE_VALUES.items():
     hue_value = math.radians(hue_value)
     change_hue(custom_image, hue_value)
 
-    custom_image.save(f"images/cat_{hue_name}.jpg")
+    custom_image.save(f"/app/images/cat_{hue_name}.jpg")
     print(f"Saved cat image for {hue_name}")
