@@ -62,6 +62,8 @@ def haar_wavelet_transform(signal, level):
                 # high_pass_f[k] represents the k-th coefficient of the high-pass filter.
                 output[j+split_len] += signal_copy[2*j + k] * \
                     high_pass_f[k] * scale_factor
+                
+            output = [round(value, 2) for value in output]
 
         # updates the length of the signal (signal_len) to be equal to split_len
         signal_len = split_len
