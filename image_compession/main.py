@@ -1,6 +1,5 @@
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def dpcm_encode(image, compression_strength):
@@ -40,10 +39,11 @@ def save_as_compressed_image(encoded_values, image_shape, compression_strength):
 
     compressed_image = Image.fromarray(encoded_array.astype(np.uint8))
 
-    compressed_image.save(f'images/compressed-{compression_strength}-cat.jpg')
+    compressed_image.save(
+        f'/app/images/compressed-{compression_strength}-cat.jpg')
 
 
-image_path = 'images/cat.jpg'
+image_path = '/app/images/cat.jpg'
 # open image as grayscale
 original_image = Image.open(image_path).convert('L')
 original_array = np.array(original_image)
