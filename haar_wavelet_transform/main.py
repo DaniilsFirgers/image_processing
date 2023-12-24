@@ -1,100 +1,68 @@
-# Hāra vilkņu pārveidošana ir grūti īstenojama uz reāla attēla, tāpēc es izmantosiu vienkāršu signālu.
-
-def haar_wavelet_transform(signal, level):
-
-    # The scale factor is used to adjust the amplitude of the signal
-    scale_factor = .5**(1/2)
-
-    # Both low and high filters help to separate different frequency components of the signal
-    # We will aplly filter to all adjacent values in the signal
-
-    # Used to extract the low-frequency components or approximation coefficients
-    # Each value in the original signal is multiplied by 1
-    # Extracts LL subband
-    low_pass_f = [1,  1]
-
-    # Used to extract high-frequency components or detail coefficients
-    # First value is multiplied by 1, second by -1
-    # Extracts LH, HL, HH subbands
-    high_pass_f = [1, -1]
-
-    # Length of the filter
-    # We need it to know how many adjacent values we need to multiply by the filter
-    filter_len = len(low_pass_f)
-
-    # Create a copy of the signal
-    signal_copy = signal
-
-    # Length of the signal
-    signal_len = len(signal_copy)
-
-    # Initialise the array for the output (all zeros)
-    output = [0] * signal_len
-
-    # We extend the the orginal signal by two zeros
-    # Now sequence is of power of 2, which is a good tehcnique for the wavelet transform
-    signal_copy = signal_copy + [0, 0]
-
-    # We will apply the filter to the signal level times
-    for i in range(level):
-
-        # We initialize the output array with zeros (length of the signal)
-        output[0:signal_len] = [0] * signal_len
-        # We divide the signal into two parts
-
-        # First part is approximation (low frequency components), second is detail ()
-        # Represents the length of the approximation coefficients at the current level
-        split_len = signal_len // 2
-
-        # Iterate over split signal
-        for j in range(split_len):
-            # Iterate over filter
-            for k in range(filter_len):
-                # Update j element of the output array.
-                # Signal_copy[2*j + k] refers to the original signal value.
-                # 2*j is used to ensure we're working with adjacent pairs of values in the original signal
-                # k is used to access the appropriate filter coefficient.
-                # low_pass_f[k] represents the k-th coefficient of the low-pass filter
-                output[j] += signal_copy[2*j + k] * \
-                    low_pass_f[k] * scale_factor
-
-                # Updates the j + split_len-th element of the output array
-                # high_pass_f[k] represents the k-th coefficient of the high-pass filter.
-                output[j+split_len] += signal_copy[2*j + k] * \
-                    high_pass_f[k] * scale_factor
-                
-            output = [round(value, 2) for value in output]
-
-        # updates the length of the signal (signal_len) to be equal to split_len
-        signal_len = split_len
-
-        # This line copies the content of output back into signal_copy. The copy is limited to the first signal_len elements
-        # Signal_copy is a copy of the original signal. After each iteration of the transform, it's updated to contain the transformed coefficients
-        # Output contains the newly computed coefficients for the current level
-        signal_copy[0:signal_len] = output[0:signal_len]
-
-    return output
+from PIL import Image
+import numpy as np
 
 
-def main():
-    signal = [56, 40, 8, 24, 48, 48, 40, 16]
+def haar_wavelet_transform(matrix):
+    # Get the number of rows and columns
+    rows, cols = matrix.shape
+    # Initialize the transformed matrix
+    transformed_matrix = matrix.copy()
 
-    # Base level
-    print("Level 0")
-    print(signal)
+    # Iterate over the half of the rows
+    for i in range(rows // 2):
+        # Iterate over the half of the columns
+        for j in range(cols // 2):
+            # average of the four positions
+            # averasge represents the low frequency or approximation coefficients
+            avg = (matrix[2*i, 2*j] + matrix[2*i, 2*j+1] +
+                   matrix[2*i+1, 2*j] + matrix[2*i+1, 2*j+1]) / 4.0
+            # difference between the four positions
+            # This represents the high frequency or detail coefficients
+            diff = (matrix[2*i, 2*j] - matrix[2*i, 2*j+1] -
+                    matrix[2*i+1, 2*j] + matrix[2*i+1, 2*j+1]) / 4.0
 
-    # Level 1 where we apply the filter once
-    print("Level 1")
-    print(haar_wavelet_transform(signal, 1))
+            # top left quadrant of the transformed matrix contains the average values
+            # approximation coefficients
+            transformed_matrix[i, j] = avg
 
-    # Level 2 where we apply the filter twice
-    print("Level 2")
-    print(haar_wavelet_transform(signal, 2))
+            # top right quadrant of the transformed matrix contains the difference values
+            # The detail coefficients correspond to changes in the columns
+            transformed_matrix[i, j + cols // 2] = diff
 
-    # Level 3 where we apply the filter three times
-    print("Level 3")
-    print(haar_wavelet_transform(signal, 3))
+            # bottom left quadrant of the transformed matrix contains the difference values
+            # The detail coefficients correspond to changes in the rows
+            transformed_matrix[i + rows // 2, j] = (
+                matrix[2*i, 2*j] - matrix[2*i, 2*j+1] + matrix[2*i+1, 2*j] - matrix[2*i+1, 2*j+1]) / 4.0
+
+            # bottom right quadrant of the transformed matrix contains the difference values
+            # The detail coefficients correspond to changes in the rows and columns
+            transformed_matrix[i + rows // 2, j + cols // 2] = (
+                matrix[2*i, 2*j] + matrix[2*i, 2*j+1] - matrix[2*i+1, 2*j] - matrix[2*i+1, 2*j+1]) / 4.0
+
+    return transformed_matrix
+
+
+def apply_haar_wavelet(image_path, output_path):
+    # Read the image using PIL
+    original_image = Image.open(image_path).convert(
+        'L')  # Convert to grayscale
+    original_matrix = np.array(original_image, dtype=float)
+
+    # Apply Haar wavelet transform
+    transformed_matrix = haar_wavelet_transform(original_matrix)
+
+    # Normalize values to the range [0, 255] for visualization purposes
+    transformed_matrix = np.clip(transformed_matrix, 0, 255)
+    transformed_matrix -= np.min(transformed_matrix)
+    transformed_matrix /= np.max(transformed_matrix) / 255.0
+
+    # Save the transformed image
+    transformed_image = Image.fromarray(transformed_matrix.astype(np.uint8))
+    transformed_image.save(output_path)
 
 
 if __name__ == "__main__":
-    main()
+    input_image_path = "/app/images/grayscale.jpg"
+    output_image_path = "/app/images/output.jpg"
+
+    apply_haar_wavelet(input_image_path, output_image_path)
