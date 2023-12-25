@@ -50,18 +50,3 @@ def sobel_operator(image):
             result_image.putpixel((x, y), gradient)
 
     return result_image
-
-
-def main():
-    input_image_path = "images/original_image.png"
-    output_image_path = "images/sobel.png"
-
-    original_image = Image.open(input_image_path)
-    sobel_image = sobel_operator(original_image)
-
-    sobel_image.save(output_image_path)
-    print(f"Sobel operator applied. Result saved at: {output_image_path}")
-
-
-if __name__ == "__main__":
-    main()

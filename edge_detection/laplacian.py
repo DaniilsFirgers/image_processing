@@ -36,18 +36,3 @@ def laplacian_filter(image):
             result_image.putpixel((x, y), laplacian_value)
 
     return result_image
-
-
-def main():
-    input_image_path = "images/original_image.png"
-    output_image_path = "images/laplacian.png"
-
-    original_image = Image.open(input_image_path)
-    laplacian_image = laplacian_filter(original_image)
-
-    laplacian_image.save(output_image_path)
-    print(f"Laplacian filter applied. Result saved at: {output_image_path}")
-
-
-if __name__ == "__main__":
-    main()
